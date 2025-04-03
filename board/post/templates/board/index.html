@@ -1,36 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{title}}</title>
-</head>
-<body>
-<ul>
-    <li><a href="{% url 'home' %}">Главная страница </a> </li>
-    {% for m in menu %}
-    {% if not forloop.last %}<li>{% else %}<li class="last">{% endif %}
+{% extends 'base.html' %}
 
-        <a href="{% url m.url_name %}">{{m.title}}</a>
-    </li>
-
-    {% endfor %}
+{% block content %}
+<ul class="list-articles">
+	{% for p in posts %}
+	{% if p.is_published %}
+			<li><h2>{{p.title}}</h2>
+	{% autoescape off %}
+	{{p.content|linebreaks|truncatewords:50}}
+	{% endautoescape %}
+			<div class="clear"></div>
+			<p class="link-read-post"><a href="{% url 'post' p.id %}">Читать пост</a></p>
+			</li>
+	{% endif %}
+	{% endfor %}
 </ul>
-<p>{{menu|join:'|'}}</p>
-<h1>{{title}}</h1>
-
-<ul>
-    {% for p in posts %}
-        {% if p.is_published %}
-            <li>
-                <h2> {{ p.title }}</h2>
-                <p> {{ p.content }}</p>
-                <p> <a href="{% url 'post' p.id %}">Читать пост</a></p>
-                {% if not forloop.last %}
-                <hr>
-                {% endif %}
-            </li>
-        {% endif %}
-    {% endfor %}
-</ul>
-</body>
-</html>
+{% endblock %}
