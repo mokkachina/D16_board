@@ -32,7 +32,7 @@
 <!-- Sidebar слева -->
 	<td valign="top" class="left-chapters">
 	<ul id="leftchapters">
-		{% if cat_selected == 0 or cat_selected is None%}
+		{% if cat_selected == 0 %}
 		<li class="selected">Все категории</li>
 		{% else %}
 		<li><a href="{% url 'home' %}">Все категории</a></li>
@@ -42,6 +42,7 @@
 		<p>Наш канал</p>
 		<a class="share-yt" href="" target="_blank" rel="nofollow"></a>
 		</li>
+		<li>{% show_all_tags %}</li>
 	</ul>
 </td>
 <!-- Конец Sidebar'а -->
@@ -56,6 +57,9 @@
 {% endblock %}
 	</div>
 <!-- Конец блока контента -->
+{% block navigation %}
+
+{% endblock %}
 
 </td></tr></table>
 </td></tr>

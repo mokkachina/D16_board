@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{title}}</h1>
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+<!--     {{ form.as_p }}-->
+         <div class="form-error">{{ form.non_field_errors }}</div>
+        {% for f in form %}
+            <p><label class="form-label" for="{{ f.id_for_label }}">{{ f.label }} </label> {{ f }}</p>
+            <div class="form-error">{{ f.errors }}</div>
+        {% endfor %}
+
+<!--        <p><label class="form-label" for="{{ form.title.id_for_label }}">{{ form.title.label }} </label> {{ form.title }}</p>-->
+<!--        <div class="form-error">{{ form.title.errors }}</div>-->
+<!--        <p><label class="form-label" for="{{ form.slug.id_for_label }}">{{ form.slug.label }} </label> {{ form.slug}}</p>-->
+<!--        <div class="form-error">{{ form.slug.errors }}</div>-->
+<!--        <p><label class="form-label" for="{{ form.content.id_for_label }}">{{ form.content.label }} </label> {{ form.content}}</p>-->
+<!--        <div class="form-error">{{ form.content.errors }}</div>-->
+<!--         <p><label class="form-label" for="{{ form.is_published.id_for_label }}">{{ form.is_published.label }} </label> {{ form.is_published }}</p>-->
+<!--        <div class="form-error">{{ form.is_published.errors }}</div>-->
+<!--          <p><label class="form-label" for="{{ form.cat.id_for_label }}">{{ form.cat.label }} </label> {{ form.cat }}</p>-->
+<!--        <div class="form-error">{{ form.cat.errors }}</div>-->
+        <p><button type="submit">Отправить</button></p>
+    </form>
+{% endblock %}
