@@ -1,5 +1,7 @@
 from gc import get_objects
 
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseNotFound, Http404
@@ -24,6 +26,7 @@ class PostHome(DataMixin, ListView):
     def get_queryset(self):
         return Post.published.all().select_related('cat')
 
+@login_required
 def about(request):
     contact_list = Post.published.all()
     paginator = Paginator(contact_list, 5)
@@ -47,11 +50,17 @@ class ShowPost(DataMixin, DetailView):
         return get_object_or_404(Post.published, slug=self.kwargs[self.slug_url_kwarg])
 
 
-class AddPage(DataMixin, CreateView):
+class AddPage(PermissionRequiredMixin, LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'board/addpost.html'
     success_url = reverse_lazy("home")
     title_page = 'Добавление статьи'
+    permission_required = 'board.add_post'
+
+    def form_valid(self, form):
+        w = form.save(commit=False)
+        w.author = self.request.user
+        return super().form_valid(form)
 
 class UpdatePage(DataMixin, UpdateView):
     model = Post
