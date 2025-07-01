@@ -13,6 +13,9 @@ from django.views.generic import TemplateView, ListView, DetailView, FormView, C
 from post.models import Post, Category, TagPost, UploadFiles
 from post.forms import AddPostForm, UploadFileForm
 from post.utils import DataMixin
+from .models import Response
+from .forms import ResponseForm
+
 
 
 class PostHome(DataMixin, ListView):
@@ -119,3 +122,72 @@ class TagPostList(DataMixin, ListView):
 
     def get_queryset(self):
         return Post.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
+
+
+class CreateResponseView(LoginRequiredMixin, CreateView):
+    model = Response
+    form_class = ResponseForm
+    template_name = 'board/create_response.html'
+
+    def form_valid(self, form):
+        post = get_object_or_404(Post, slug=self.kwargs['post_slug'])
+        form.instance.author = self.request.user
+        form.instance.post = post
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('post_detail', kwargs={'post_slug': self.object.post.slug})
+
+
+class UserResponsesView(LoginRequiredMixin, ListView):
+    model = Response
+    template_name = 'board/user_responses.html'
+    context_object_name = 'responses'
+    paginate_by = 10
+
+    def get_queryset(self):
+        # Получаем только отклики на объявления текущего пользователя
+        queryset = Response.objects.filter(post__author=self.request.user)
+
+        # Фильтрация по статусу
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        # Фильтрация по объявлению
+        post_id = self.request.GET.get('post')
+        if post_id:
+            queryset = queryset.filter(post_id=post_id)
+
+        return queryset.order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем в контекст все объявления пользователя для фильтра
+        context['user_posts'] = Post.objects.filter(author=self.request.user)
+        return context
+
+
+class UpdateResponseStatusView(LoginRequiredMixin, UpdateView):
+    model = Response
+    fields = ['status']
+    template_name = 'board/update_response_status.html'
+
+    def get_queryset(self):
+        # Разрешаем изменять только отклики на свои объявления
+        return super().get_queryset().filter(post__author=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('user_responses')
+
+
+class DeleteResponseView(LoginRequiredMixin, DeleteView):
+    model = Response
+    template_name = 'board/delete_response.html'
+
+    def get_queryset(self):
+        # Разрешаем удалять только отклики на свои объявления
+        return super().get_queryset().filter(post__author=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('user_responses')

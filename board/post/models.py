@@ -64,3 +64,27 @@ class TagPost(models.Model):
         return reverse('tag', kwargs={'tag_slug': self.slug})
 class UploadFiles(models.Model):
     file = models.FileField(upload_to='uploads_media')
+
+class Response(models.Model):
+
+    class Status(models.TextChoices):
+        PENDING = 'P', 'На рассмотрении'
+        ACCEPTED = 'A', 'Принят'
+        REJECTED = 'R', 'Отклонен'
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='responses')
+    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='responses')
+    text = models.TextField(verbose_name='Текст отклика')
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=1, choices=Status.choices, default=Status.PENDING)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Отклик'
+        verbose_name_plural = 'Отклики'
+
+    def __str__(self):
+        return f"Отклик от {self.author} на {self.post}"
+
+    def get_absolute_url(self):
+        return reverse('response_detail', kwargs={'pk': self.pk})

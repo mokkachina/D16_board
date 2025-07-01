@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Отклики на мои объявления</h1>
+
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <select name="post" class="form-select">
+                <option value="">Все объявления</option>
+                {% for post in user_posts %}
+                <option value="{{ post.id }}" {% if request.GET.post == post.id|stringformat:"s" %}selected{% endif %}>
+                    {{ post.title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select name="status" class="form-select">
+                <option value="">Все статусы</option>
+                {% for value, label in Response.Status.choices %}
+                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Фильтровать</button>
+            <a href="{% url 'user_responses' %}" class="btn btn-secondary">Сбросить</a>
+        </div>
+    </div>
+</form>
+
+{% for response in responses %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">
+            <a href="{{ response.post.get_absolute_url }}">{{ response.post.title }}</a>
+        </h5>
+        <p class="card-text">{{ response.text }}</p>
+        <p class="text-muted">
+            От {{ response.author.username }} | {{ response.created_at|date:"d.m.Y H:i" }}
+            <span class="badge bg-{% if response.status == 'A' %}success{% elif response.status == 'R' %}danger{% else %}warning{% endif %}">
+                {{ response.get_status_display }}
+            </span>
+        </p>
+        
+        {% if response.status == 'P' %}
+        <div class="btn-group">
+            <a href="{% url 'update_response' response.pk %}?status=A" class="btn btn-sm btn-success">Принять</a>
+            <a href="{% url 'update_response' response.pk %}?status=R" class="btn btn-sm btn-danger">Отклонить</a>
+        </div>
+        {% endif %}
+        <a href="{% url 'delete_response' response.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+    </div>
+</div>
+{% empty %}
+<p>Нет откликов.</p>
+{% endfor %}
+
+{% include 'includes/pagination.html' %}
+{% endblock %}

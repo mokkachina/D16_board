@@ -6,7 +6,7 @@ from django.template.defaultfilters import title
 from django.utils.deconstruct import deconstructible
 from django.core.exceptions import ValidationError
 
-from .models import  Category, Post
+from .models import  Category, Post, Response
 
 @deconstructible
 class RussianValidator:
@@ -46,3 +46,15 @@ class AddPostForm(forms.ModelForm):
         return title
 class UploadFileForm(forms.Form):
     file = forms.FileField(label='Фаил')
+
+class ResponseForm(forms.ModelForm):
+    class Meta:
+        model = Response
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Напишите ваш отклик здесь...'
+            }),
+        }
