@@ -151,7 +151,7 @@ class UserResponsesView(LoginRequiredMixin, ListView):
     model = Response
     template_name = 'board/user_responses.html'
     context_object_name = 'responses'
-    paginate_by = 10
+    paginate_by = 5
 
     def get_queryset(self):
         # Получаем только отклики на объявления текущего пользователя
@@ -194,8 +194,12 @@ class DeleteResponseView(LoginRequiredMixin, DeleteView):
     template_name = 'board/delete_response.html'
 
     def get_queryset(self):
-        # Разрешаем удалять только отклики на свои объявления
         return super().get_queryset().filter(post__author=self.request.user)
 
     def get_success_url(self):
         return reverse_lazy('user_responses')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()

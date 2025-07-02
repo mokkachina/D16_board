@@ -77,4 +77,18 @@
 </td></tr></table>
 <!-- Конец footer'а и страницы -->
 </body>
+
 </html>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteForms = document.querySelectorAll('.delete-form');
+
+    deleteForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Вы уверены, что хотите удалить этот отклик?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
