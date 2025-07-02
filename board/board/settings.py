@@ -32,7 +32,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1"]
 INTERNAL_IPS = ["127.0.0.1"]
-
+SITE_URL = 'http://127.0.0.1:8000'
 # Application definition
 
 INSTALLED_APPS = [
@@ -149,7 +149,7 @@ EMAIL_HOST = "smtp.yandex.ru"
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'maxiklim@yandex.ru'
 EMAIL_HOST_PASSWORD = 'pqqggrvfmeemjkdh'
-EMAIL_USE_SSL = True
+# EMAIL_USE_SSL = True
 EMAIL_USE_TLS = True
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

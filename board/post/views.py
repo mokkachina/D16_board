@@ -1,9 +1,10 @@
 from gc import get_objects
-
+from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.template.defaultfilters import title
 from django.urls import reverse, reverse_lazy
@@ -15,6 +16,7 @@ from post.forms import AddPostForm, UploadFileForm
 from post.utils import DataMixin
 from .models import Response
 from .forms import ResponseForm
+from django.core.mail import send_mail
 
 
 
@@ -176,17 +178,72 @@ class UserResponsesView(LoginRequiredMixin, ListView):
         return context
 
 
+
+
 class UpdateResponseStatusView(LoginRequiredMixin, UpdateView):
     model = Response
     fields = ['status']
     template_name = 'board/update_response_status.html'
 
-    def get_queryset(self):
-        # Разрешаем изменять только отклики на свои объявления
-        return super().get_queryset().filter(post__author=self.request.user)
+    def form_valid(self, form):
+        response = self.object
+
+        # Сохраняем форму, но не возвращаем результат сразу
+        super().form_valid(form)
+
+        if form.cleaned_data['status'] == 'A':
+            try:
+                # Отправляем email в фоновом режиме, не блокируя ответ
+                self._send_acceptance_notification_async(response)
+                messages.success(self.request, "Отклик принят. Уведомление отправляется.")
+            except Exception as e:
+                # Если что-то пошло не так, просто логируем ошибку
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Ошибка при отправке уведомления: {str(e)}")
+                messages.success(self.request, "Отклик принят (ошибка отправки уведомления)")
+        else:
+            messages.success(self.request, "Отклик отклонен")
+
+        # Возвращаем редирект независимо от результата отправки email
+        return HttpResponseRedirect(self.get_success_url())
+
+    def _send_acceptance_notification_async(self, response):
+        """Асинхронная отправка уведомления"""
+        from threading import Thread
+
+        def send_email():
+            try:
+                if not response.author.email:
+                    return
+
+                context = {
+                    'post_title': response.post.title,
+                    'post_url': self.request.build_absolute_uri(response.post.get_absolute_url()),
+                    'author_name': response.author.username
+                }
+
+                html_message = render_to_string('emails/response_accepted.html', context)
+
+                send_mail(
+                    subject='Ваш отклик принят',
+                    message='',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[response.author.email],
+                    html_message=html_message,
+                    fail_silently=True,  # Не вызывать исключения при ошибке
+                )
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Ошибка при отправке email: {str(e)}")
+
+        # Запускаем в отдельном потоке
+        Thread(target=send_email).start()
 
     def get_success_url(self):
-        return reverse_lazy('user_responses')
+        return reverse('user_responses')
+
 
 
 class DeleteResponseView(LoginRequiredMixin, DeleteView):
