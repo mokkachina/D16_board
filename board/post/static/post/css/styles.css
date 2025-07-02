@@ -16,7 +16,140 @@ a:hover {
 	text-decoration: underline;
 }
 
-img {max-width: 600px; height: auto;}
+img
+
+/* Стили для откликов */
+.response-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    position: relative;
+}
+
+.response-card:hover {
+    background-color: #f0f0f0;
+}
+
+.response-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.response-author {
+    font-weight: bold;
+    color: #0059b2;
+}
+
+.response-date {
+    color: #777;
+    font-size: 0.9em;
+}
+
+.response-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.response-status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.response-status-accepted {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.response-status-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.response-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.response-actions .btn {
+    margin-left: 10px;
+    padding: 5px 15px;
+    font-size: 0.9em;
+}
+
+/* Фильтры откликов */
+.response-filters {
+    background: #f5f5f5;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.filter-group {
+    margin-bottom: 10px;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Форма отклика */
+.response-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+.response-form textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+/* Пустая страница откликов */
+.no-responses {
+    text-align: center;
+    padding: 40px;
+    color: #777;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .response-header {
+        flex-direction: column;
+    }
+
+    .response-date {
+        margin-top: 5px;
+    }
+
+    .response-actions .btn {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+    }
+}
 
 img.img-article-left {
 	max-width: 300px;
@@ -406,4 +539,192 @@ ul.lang-list li a:hover {color: #fdc073;}
 .form-button {
     min-width: 200px;
     font-size: 16px;
+}
+/* Стили для блока откликов */
+.responses-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.responses-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Форма отклика */
+.response-form {
+    margin-bottom: 30px;
+}
+
+.response-form h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    resize: vertical;
+}
+
+.submit-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #45a049;
+}
+
+/* Список откликов */
+.responses-list {
+    margin-top: 20px;
+}
+
+.response {
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.response.accepted {
+    border-left: 4px solid #4CAF50;
+}
+
+.response.rejected {
+    border-left: 4px solid #f44336;
+}
+
+.response-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.response-author {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.response-date {
+    color: #777;
+    font-size: 0.9em;
+}
+
+.response-text {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.response-status {
+    font-style: italic;
+    color: #555;
+}
+
+/* Кнопки действий */
+.response-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.action-form {
+    margin: 0;
+}
+
+.accept-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.reject-btn {
+    background-color: #f44336;
+    color: white;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.auth-notice {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.no-responses {
+    color: #777;
+    font-style: italic;
+}
+/* Стили для формы отклика */
+.response-form {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.response-form textarea {
+    width: 100%;
+    min-height: 120px;
+}
+
+/* Стили для списка откликов */
+.responses {
+    margin-top: 2rem;
+}
+
+.response {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+}
+
+.response .meta {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Стили для статусов */
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    margin-left: 1rem;
+}
+
+.status-badge.P {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.A {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.R {
+    background-color: #f8d7da;
+    color: #721c24;
 }

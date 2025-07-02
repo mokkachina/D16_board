@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Новый отклик</title>
 </head>
 <body>
-
+    <p>Здравствуйте, {{ post.author.username }}!</p>
+    <p>На ваше объявление "<a href="{{ post_url }}">{{ post.title }}</a>" поступил новый отклик:</p>
+    <blockquote>{{ response.text }}</blockquote>
+    <p>Автор отклика: {{ response.author.username }}</p>
+    <p>Вы можете <a href="{{ responses_url }}">управлять откликами</a> в личном кабинете.</p>
 </body>
 </html>

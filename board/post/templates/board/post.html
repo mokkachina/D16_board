@@ -1,14 +1,12 @@
 {% extends 'base.html' %}
 
-
 {% block breadcrumbs %}
 {% with post.tags.all as tags %}
 {% if tags %}
-
     <ul class="tag_list">
         <li>Теги:</li>
         {% for t in tags %}
-        <li><a href="{{t.get_absolute_url}}">{{ t.tag }}</a> </li>
+        <li><a href="{{t.get_absolute_url}}">{{ t.tag }}</a></li>
         {% endfor %}
     </ul>
 {% endif %}
@@ -16,11 +14,66 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{post.title}}</h1>
+<article class="post-content">
+    <h1>{{ post.title }}</h1>
 
-{% if post.photo %}
-<p><img class="img-article-left" src="{{post.photo.url}}"></p>
-{% endif %}
+    {% if post.photo %}
+    <p><img class="img-article-left" src="{{ post.photo.url }}"></p>
+    {% endif %}
 
-{{post.content|linebreaks}}
+    {{ post.content|linebreaks }}
+</article>
+
+<!-- Блок откликов -->
+<div class="responses-section">
+    <h2 class="responses-title">Отклики</h2>
+
+    {% if user.is_authenticated %}
+    <div class="response-form">
+        <h3>Оставить отклик</h3>
+        <form method="post" action="{% url 'create_response' post_slug=post.slug %}">
+            {% csrf_token %}
+            <textarea name="text" required placeholder="Ваш отклик..." class="form-textarea"></textarea>
+            <button type="submit" class="submit-button">Отправить</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="auth-notice">
+        <p>Чтобы оставить отклик, пожалуйста <a href="{% url 'login' %}?next={{ request.path }}">войдите</a>.</p>
+    </div>
+    {% endif %}
+
+    {% if responses %}
+    <div class="responses-list">
+        {% for response in responses %}
+        <div class="response {% if response.status == 'A' %}accepted{% elif response.status == 'R' %}rejected{% endif %}">
+            <div class="response-header">
+                <span class="response-author">{{ response.author.username }}</span>
+                <span class="response-date">{{ response.created_at|date:"d.m.Y H:i" }}</span>
+                {% if user == post.author and response.status == 'P' %}
+                <div class="response-actions">
+                    <form method="post" action="{% url 'update_response' pk=response.pk %}?status=A" class="action-form">
+                        {% csrf_token %}
+                        <button type="submit" class="accept-btn">Принять</button>
+                    </form>
+                    <form method="post" action="{% url 'update_response' pk=response.pk %}?status=R" class="action-form">
+                        {% csrf_token %}
+                        <button type="submit" class="reject-btn">Отклонить</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            <div class="response-text">{{ response.text }}</div>
+            {% if response.status != 'P' %}
+            <div class="response-status">
+                Статус: {{ response.get_status_display }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-responses">Пока нет откликов</p>
+    {% endif %}
+</div>
 {% endblock %}

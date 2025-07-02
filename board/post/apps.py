@@ -6,9 +6,9 @@ class PostConfig(AppConfig):
     name = "post"
 
 
-class YourAppConfig(AppConfig):
+class BoardConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'your_app'
+    name = 'board'
 
     def ready(self):
-        import your_app.signals
+        import board.signals

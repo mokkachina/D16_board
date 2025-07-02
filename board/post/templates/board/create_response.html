@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="response-form">
+    <h2>Оставить отклик на объявление "{{ post.title }}"</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.text }}
+        <button type="submit" class="btn btn-primary">Отправить отклик</button>
+    </form>
+</div>
+{% endblock %}

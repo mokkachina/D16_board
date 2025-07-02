@@ -40,14 +40,21 @@ def about(request):
 
 
 class ShowPost(DataMixin, DetailView):
-    # model = Post
     template_name = 'board/post.html'
     slug_url_kwarg = 'post_slug'
     context_object_name = 'post'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data( **kwargs)
-        return self.get_mixin_context(context, title=context['post'].title)
+        context = super().get_context_data(**kwargs)
+        context = self.get_mixin_context(context, title=context['post'].title)
+
+        # Добавляем отклики к контексту
+        if self.request.user.is_authenticated:
+            context['responses'] = Response.objects.filter(
+                post=self.object
+            ).select_related('author').order_by('-created_at')
+
+        return context
 
     def get_object(self, queryset=None):
         return get_object_or_404(Post.published, slug=self.kwargs[self.slug_url_kwarg])
@@ -136,7 +143,8 @@ class CreateResponseView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('post_detail', kwargs={'post_slug': self.object.post.slug})
+        # Используем существующее имя URL 'post' вместо 'post_detail'
+        return reverse('post', kwargs={'post_slug': self.object.post.slug})
 
 
 class UserResponsesView(LoginRequiredMixin, ListView):
