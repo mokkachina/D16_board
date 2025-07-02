@@ -17,8 +17,10 @@ from post.utils import DataMixin
 from .models import Response
 from .forms import ResponseForm
 from django.core.mail import send_mail
+import logging
+from threading import Thread
 
-
+logger = logging.getLogger(__name__)
 
 class PostHome(DataMixin, ListView):
     # model = Post
@@ -187,62 +189,64 @@ class UpdateResponseStatusView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = self.object
-
-        # Сохраняем форму, но не возвращаем результат сразу
-        super().form_valid(form)
+        super().form_valid(form)  # Сохраняем изменения статуса
 
         if form.cleaned_data['status'] == 'A':
             try:
-                # Отправляем email в фоновом режиме, не блокируя ответ
                 self._send_acceptance_notification_async(response)
                 messages.success(self.request, "Отклик принят. Уведомление отправляется.")
             except Exception as e:
-                # Если что-то пошло не так, просто логируем ошибку
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Ошибка при отправке уведомления: {str(e)}")
+                logger.error(f"Ошибка при создании задачи отправки: {str(e)}")
                 messages.success(self.request, "Отклик принят (ошибка отправки уведомления)")
         else:
             messages.success(self.request, "Отклик отклонен")
 
-        # Возвращаем редирект независимо от результата отправки email
         return HttpResponseRedirect(self.get_success_url())
 
     def _send_acceptance_notification_async(self, response):
         """Асинхронная отправка уведомления"""
-        from threading import Thread
+        if not response.author.email:
+            logger.warning(f"Пользователь {response.author.username} не имеет email")
+            return
 
-        def send_email():
-            try:
-                if not response.author.email:
-                    return
-
-                context = {
-                    'post_title': response.post.title,
-                    'post_url': self.request.build_absolute_uri(response.post.get_absolute_url()),
-                    'author_name': response.author.username
-                }
-
-                html_message = render_to_string('emails/response_accepted.html', context)
-
-                send_mail(
-                    subject='Ваш отклик принят',
-                    message='',
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[response.author.email],
-                    html_message=html_message,
-                    fail_silently=True,  # Не вызывать исключения при ошибке
-                )
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Ошибка при отправке email: {str(e)}")
+        # Создаем копию данных для потока
+        email_data = {
+            'email': response.author.email,
+            'post_title': response.post.title,
+            'post_url': self.request.build_absolute_uri(response.post.get_absolute_url()),
+            'author_name': response.author.username,
+            'from_email': settings.DEFAULT_FROM_EMAIL
+        }
 
         # Запускаем в отдельном потоке
-        Thread(target=send_email).start()
+        Thread(target=self._send_email_thread, args=(email_data,)).start()
+
+    def _send_email_thread(self, email_data):
+        """Метод для выполнения в потоке"""
+        try:
+            context = {
+                'post_title': email_data['post_title'],
+                'post_url': email_data['post_url'],
+                'author_name': email_data['author_name']
+            }
+
+            html_message = render_to_string('emails/response_accepted.html', context)
+
+            send_mail(
+                subject='Ваш отклик принят',
+                message='Текстовая версия письма',
+                from_email=email_data['from_email'],
+                recipient_list=[email_data['email']],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            logger.info(f"Письмо успешно отправлено на {email_data['email']}")
+        except Exception as e:
+            logger.error(f"Ошибка отправки email: {str(e)}")
 
     def get_success_url(self):
-        return reverse('user_responses')
+        return reverse('user_responses')  # Исправлено: убрана лишняя "п"
+
 
 
 
